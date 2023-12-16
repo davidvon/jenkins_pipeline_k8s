@@ -1,11 +1,11 @@
 // 需要在jenkins的Credentials设置中配置jenkins-harbor-creds、jenkins-k8s-config参数
 pipeline {
     agent any
-    environment {
-//         HARBOR_CREDS = credentials('jenkins-harbor-creds')
-//         K8S_CONFIG = credentials('jenkins-k8s-config')
-        GIT_TAG = "v0.01" //sh(returnStdout: true,script: 'git describe --tags --always').trim()
-    }
+//     environment {
+// //         HARBOR_CREDS = credentials('jenkins-harbor-creds')
+// //         K8S_CONFIG = credentials('jenkins-k8s-config')
+// //         GIT_TAG = "v0.01" //sh(returnStdout: true,script: 'git describe --tags --always').trim()
+//     }
     parameters {
         string(name: 'HARBOR_HOST', defaultValue: '172.23.101.66', description: 'harbor仓库地址')
         string(name: 'DOCKER_IMAGE', defaultValue: 'davidvon/pipeline-demo', description: 'docker镜像名')
@@ -14,7 +14,7 @@ pipeline {
     }
     stages {
         stage('Maven Build') {
-            when { expression { env.GIT_TAG != null } }
+//             when { expression { env.GIT_TAG != null } }
             agent {
                 docker {
                     image 'maven:3-jdk-8-alpine'
@@ -28,36 +28,34 @@ pipeline {
 
         }
         stage('Docker Build') {
-            when { 
-                allOf {
-                    expression { env.GIT_TAG != null }
-                }
-            }
+//             when {
+//                 allOf {
+//                     expression { env.GIT_TAG != null }
+//                 }
+//             }
             agent any
             steps {
                 unstash 'app'
                 sh "docker login -u 108424@qq.com -p Davidvon12345"
-                sh "docker build --build-arg JAR_FILE=`ls target/*.jar |cut -d '/' -f2` -t davidvon/${params.DOCKER_IMAGE}:${GIT_TAG} ."
-                sh "docker push davidvon/${params.DOCKER_IMAGE}:${GIT_TAG}"
-                sh "docker rmi davidvon/${params.DOCKER_IMAGE}:${GIT_TAG}"
+                sh "docker build --build-arg JAR_FILE=`ls target/*.jar |cut -d '/' -f2` -t davidvon/${params.DOCKER_IMAGE}:v0.01 ."
+                sh "docker push davidvon/${params.DOCKER_IMAGE}:v0.01"
+                sh "docker rmi davidvon/${params.DOCKER_IMAGE}:v0.01"
             }
             
         }
         stage('Deploy') {
-            when { 
-                allOf {
-                    expression { env.GIT_TAG != null }
-                }
-            }
+//             when {
+//                 allOf {
+//                     expression { env.GIT_TAG != null }
+//                 }
+//             }
             agent {
                 docker {
                     image 'lwolf/helm-kubectl-docker'
                 }
             }
             steps {
-                sh "mkdir -p ~/.kube"
-//                 sh "echo ${K8S_CONFIG} | base64 -d > ~/.kube/config"
-                sh "sed -e 's#{IMAGE_URL}#davidvon/${params.DOCKER_IMAGE}#g;s#{IMAGE_TAG}#${GIT_TAG}#g;s#{APP_NAME}#${params.APP_NAME}#g;s#{SPRING_PROFILE}#k8s-test#g' k8s-deployment.tpl > k8s-deployment.yml"
+                sh "sed -e 's#{IMAGE_URL}#davidvon/${params.DOCKER_IMAGE}#g;s#{IMAGE_TAG}#v0.01#g;s#{APP_NAME}#${params.APP_NAME}#g;s#{SPRING_PROFILE}#k8s-test#g' k8s-deployment.tpl > k8s-deployment.yml"
                 sh "kubectl apply -f k8s-deployment.yml --namespace=${params.K8S_NAMESPACE}"
             }
             
