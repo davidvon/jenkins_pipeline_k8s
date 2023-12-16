@@ -32,4 +32,6 @@ spec:
     name: {APP_NAME}-deployment
   ports:
     - port: 9080
-      targetPort: 30080
+      targetPort: 9080
+      nodePort: 30080
+  type: NodePort
