@@ -1,11 +1,12 @@
 // 需要在jenkins的Credentials设置中配置jenkins-harbor-creds、jenkins-k8s-config参数
+//     environment {
+//         HARBOR_CREDS = credentials('jenkins-harbor-creds')
+//         K8S_CONFIG = credentials('jenkins-k8s-config')
+//         GIT_TAG = sh(returnStdout: true,script: 'git describe --tags --always').trim()
+//     }
+
 pipeline {
     agent any
-    environment {
-        HARBOR_CREDS = credentials('jenkins-harbor-creds')
-        K8S_CONFIG = credentials('jenkins-k8s-config')
-        GIT_TAG = sh(returnStdout: true,script: 'git describe --tags --always').trim()
-    }
     parameters {
         string(name: 'GIT_TAG', defaultValue: 'v0.0.1', description: 'TAG分支')
         string(name: 'REPO_EMAIL', defaultValue: '108424@qq.com', description: '仓库用户邮箱')
@@ -17,7 +18,7 @@ pipeline {
     }
     stages {
         stage('Maven Build') {
-            when { expression { env.GIT_TAG != null } }
+            when { expression { params.GIT_TAG != null } }
             agent {
                 docker {
                     image 'maven:3-jdk-8-alpine'
@@ -33,23 +34,23 @@ pipeline {
         stage('Docker Build') {
             when {
                 allOf {
-                    expression { env.GIT_TAG != null }
+                    expression { params.GIT_TAG != null }
                 }
             }
             agent any
             steps {
                 unstash 'app'
                 sh "docker login -u ${params.REPO_EMAIL} -p ${params.REPO_PWD} ${params.REPO_HOST}"
-                sh "docker build --build-arg JAR_FILE=`ls target/*.jar |cut -d '/' -f2` -t ${params.DOCKER_IMAGE}:${GIT_TAG} ."
-                sh "docker push ${params.DOCKER_IMAGE}:${GIT_TAG}"
-                sh "docker rmi ${params.DOCKER_IMAGE}:${GIT_TAG}"
+                sh "docker build --build-arg JAR_FILE=`ls target/*.jar |cut -d '/' -f2` -t ${params.DOCKER_IMAGE}:${params.GIT_TAG} ."
+                sh "docker push ${params.DOCKER_IMAGE}:${params.GIT_TAG}"
+                sh "docker rmi ${params.DOCKER_IMAGE}:${params.GIT_TAG}"
             }
 
         }
         stage('Deploy') {
             when {
                 allOf {
-                    expression { env.GIT_TAG != null }
+                    expression { params.GIT_TAG != null }
                 }
             }
             agent {
