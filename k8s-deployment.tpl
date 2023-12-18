@@ -18,7 +18,7 @@ spec:
       - name: {APP_NAME}
         image: {DOCKER_IMAGE}:{IMAGE_TAG}
         ports:
-        - containerPort: 30080
+        - containerPort: 8080
         env:
           - name: SPRING_PROFILES_ACTIVE
             value: {SPRING_PROFILE}
@@ -26,12 +26,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {APP_NAME}-svc
+  name: {APP_NAME}-service
+  labels:
+    app: {APP_NAME}
 spec:
   selector:
-    name: {APP_NAME}-deployment
+    name: {APP_NAME}
+    app: {APP_NAME}
   ports:
-    - port: 9080
-      targetPort: 9080
-      nodePort: 30080
+    - port: 8088
+      targetPort: 8080
+      nodePort: 30000
   type: NodePort
