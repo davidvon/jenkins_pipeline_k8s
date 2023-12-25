@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {APP_NAME}-deployment
+  name: {APP_NAME}
   labels:
     app: {APP_NAME}
 spec:
@@ -26,7 +26,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {APP_NAME}-service
+  name: {APP_NAME}
   labels:
     app: {APP_NAME}
 spec:
