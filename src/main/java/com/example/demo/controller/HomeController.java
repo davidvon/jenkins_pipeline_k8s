@@ -10,4 +10,9 @@ public class HomeController {
     public String hello() {
         return "Hello!";
     }
+
+    @GetMapping("/version")
+    public String version() {
+        return "version=v0.1";
+    }
 }
