@@ -15,15 +15,15 @@ spec:
         app: {APP_NAME}
     spec:
       containers:
-      - name: {APP_NAME}
-        image: {DOCKER_IMAGE}:{IMAGE_TAG}
+      - image: {DOCKER_IMAGE}:{IMAGE_TAG}
+        name: {APP_NAME}
         ports:
-        - containerPort: 80
+        - containerPort: 30080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {APP_NAME}
+  name: {APP_NAME}-svc
   labels:
     app: {APP_NAME}
 spec:
