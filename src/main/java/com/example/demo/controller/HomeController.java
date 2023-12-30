@@ -12,12 +12,14 @@ public class HomeController {
     @GetMapping("")
     public String hello() {
         logger.info("/");
+        System.out.println("/");
         return "Hello!";
     }
 
     @GetMapping("/version")
     public String version() {
         logger.info("/version");
+        System.out.println("/version");
         return "version=v0.1";
     }
 }
